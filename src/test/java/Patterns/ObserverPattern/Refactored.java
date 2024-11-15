@@ -1,3 +1,9 @@
+
+/* In this refactored example, we apply the Observer Pattern. The test execution class (subject)
+ notifies multiple observers (logging and notification services) whenever a test event occurs.
+ This approach decouples the test execution logic from the observers
+ and makes it easy to add or remove observers.*/
+
 import java.util.ArrayList;
 import java.util.List;
 

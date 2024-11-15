@@ -1,3 +1,9 @@
+
+
+// In this refactored code, the Strategy Pattern is used to encapsulate different login
+// strategies in separate classes, making the login logic modular and maintainable.
+
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;

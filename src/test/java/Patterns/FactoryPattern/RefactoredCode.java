@@ -1,3 +1,6 @@
+//This refactored code example uses the Factory Pattern to centralize WebDriver instantiation,
+//reducing code duplication and improving maintainability.
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -46,3 +49,9 @@ public class BrowserTest {
     // - Improved maintainability and scalability.
     // - Reduced code duplication by using a consistent factory method for WebDriver instantiation.
 }
+
+/*Explanation of Changes
+Centralized WebDriver Instantiation: The WebDriverFactory class handles WebDriver creation, making it easier to add new browsers by updating only the factory method.
+Reduced Duplication: Each test method now uses the WebDriverFactory.getDriver method, reducing code duplication and making the tests cleaner.
+Scalability: If a new browser needs to be added (e.g., Safari), it can be done in the factory class without modifying each test method.
+Consistent Cleanup: All tests now follow a consistent pattern for starting and quitting WebDriver sessions.*/

@@ -1,3 +1,7 @@
+//In this refactored version, the WebDriverManager class uses the Singleton Pattern to
+//ensure only one instance of WebDriver is created and shared across tests.
+
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
