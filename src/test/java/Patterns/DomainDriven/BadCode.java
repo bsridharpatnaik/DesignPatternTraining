@@ -1,28 +1,34 @@
 public class ECommerceTests {
-
     @Test
     public void testAddProductToCart() {
-        // Hard-coded data and no business context
+        // Problem 1: Raw strings instead of domain objects
         String username = "testUser";
         String productId = "123";
         System.out.println("Adding product to cart for user: " + username);
-        // Logic for adding product to cart...
     }
 
     @Test
     public void testAdminViewAllOrders() {
-        // Hard-coded admin data with no separation of contexts
+        // Problem 2: No role validation or business rules
         String adminUsername = "adminUser";
         System.out.println("Admin viewing all orders for: " + adminUsername);
-        // Logic for viewing orders...
     }
 
     @Test
     public void testCustomerCheckOut() {
-        // Mixed roles, scattered test data, and no domain structure
+        // Problem 3: No domain boundaries or contexts
         String customerId = "customer123";
         String cartId = "cart567";
         System.out.println("Customer checking out with cart: " + cartId);
-        // Logic for checkout...
     }
+
+    /* Major Issues:
+     * 1. No domain objects or business rules
+     * 2. Mixed responsibilities and contexts
+     * 3. No validation of roles or permissions
+     * 4. Hard-coded strings instead of proper types
+     * 5. Business logic scattered across tests
+     * 6. No separation of concerns
+     * 7. Hard to maintain and extend
+     */
 }

@@ -1,83 +1,78 @@
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-
-// Base class for browsers
+/**
+ * Base browser class defining contract
+ */
 abstract class Browser {
     abstract WebDriver launchBrowser();
     abstract void quitBrowser(WebDriver driver);
 }
 
-// Subclass for Chrome browser
+/**
+ * Chrome implementation - follows contract
+ */
 class ChromeBrowser extends Browser {
     @Override
     WebDriver launchBrowser() {
-        System.out.println("Launching Chrome browser...");
         return new ChromeDriver();
     }
 
     @Override
     void quitBrowser(WebDriver driver) {
         driver.quit();
-        System.out.println("Chrome browser quit.");
     }
 }
 
-// Subclass for Firefox browser
+/**
+ * Firefox implementation - follows contract
+ */
 class FirefoxBrowser extends Browser {
     @Override
     WebDriver launchBrowser() {
-        System.out.println("Launching Firefox browser...");
         return new FirefoxDriver();
     }
 
     @Override
     void quitBrowser(WebDriver driver) {
         driver.quit();
-        System.out.println("Firefox browser quit.");
     }
 }
 
-// Subclass for Headless browser (LSP Violation)
+/**
+ * Headless browser - VIOLATES LSP
+ * Does not fulfill the contract of base class
+ */
 class HeadlessBrowser extends Browser {
     @Override
     WebDriver launchBrowser() {
-        System.out.println("Launching headless browser...");
-        return null; // Violation: Does not return a valid WebDriver
+        // Problem 1: Returns null instead of WebDriver
+        return null;
     }
 
     @Override
     void quitBrowser(WebDriver driver) {
-        System.out.println("Cannot quit a headless browser."); // Unexpected behavior
+        // Problem 2: Doesn't actually quit the browser
+        System.out.println("Cannot quit headless browser");
     }
 }
 
 public class BrowserTest {
-
     public void runTest(Browser browser) {
+        // Problem 3: Need extra checks due to LSP violation
         WebDriver driver = browser.launchBrowser();
-        if (driver != null) {
+        if (driver != null) {  // Shouldn't need this check
             driver.get("http://example.com");
-            System.out.println("Running test...");
             browser.quitBrowser(driver);
         } else {
-            System.out.println("Browser launch failed."); // Additional check due to LSP violation
+            System.out.println("Browser launch failed");
         }
     }
 
-    public static void main(String[] args) {
-        BrowserTest test = new BrowserTest();
-
-        // Works as expected
-        test.runTest(new ChromeBrowser());
-        test.runTest(new FirefoxBrowser());
-
-        // Fails due to LSP violation
-        test.runTest(new HeadlessBrowser());
-    }
-
-    // Problems:
-    // - HeadlessBrowser does not behave as expected (launchBrowser returns null).
-    // - Test logic requires additional checks to handle specific subclasses.
-    // - Violates the promise of the base class, breaking substitutability.
+    /* Problems:
+     * 1. Subclass breaks parent's contract
+     * 2. Client needs extra null checks
+     * 3. Can't substitute HeadlessBrowser for Browser
+     * 4. Unexpected behavior in subclass
+     * 5. Breaks polymorphism
+     * 6. Makes code unreliable
+     * 7. Hard to maintain and debug
+     */
 }

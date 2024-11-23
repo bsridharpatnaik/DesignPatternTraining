@@ -3,33 +3,33 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
 public class BrowserTest {
-
     public void testInChrome() {
-        // Issue: Hard-coded WebDriver instantiation for Chrome
+        // Problem 1: Direct instantiation of WebDriver
         WebDriver driver = new ChromeDriver();
         driver.get("http://example.com");
         System.out.println("Running test in Chrome");
 
-        // Test steps here...
-
-        // Issue: Manual driver quit - needs repetition in each test
+        // Test steps...
         driver.quit();
     }
 
     public void testInFirefox() {
-        // Issue: Hard-coded WebDriver instantiation for Firefox
+        // Problem 2: Duplicate code for different browser
         WebDriver driver = new FirefoxDriver();
         driver.get("http://example.com");
         System.out.println("Running test in Firefox");
 
-        // Test steps here...
-
-        driver.quit(); // Repeated quit method for every test
+        // Test steps...
+        driver.quit();
     }
 
-    // Issues Summary:
-    // - Code duplication for WebDriver setup in each test method.
-    // - Adding a new browser requires modifying each test method.
-    // - Hard-coded WebDriver instances lead to high maintenance costs.
-    // - Lack of flexibility and scalability.
+    /* Major Issues:
+     * 1. Hard-coded WebDriver creation
+     * 2. Duplicate browser setup code
+     * 3. Adding new browser requires changing all test methods
+     * 4. No central place to manage driver configuration
+     * 5. Inconsistent driver initialization
+     * 6. Hard to switch browsers dynamically
+     * 7. Hard to maintain driver setup logic
+     */
 }

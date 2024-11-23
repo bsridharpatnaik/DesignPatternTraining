@@ -1,46 +1,46 @@
-// REST API client
+// REST API client with its own interface
 class RestAPIClient {
     public void authenticate(String token) {
         System.out.println("Authenticating REST API with token: " + token);
     }
 
     public String fetchData(String endpoint) {
-        System.out.println("Fetching data from REST API endpoint: " + endpoint);
         return "REST API Data";
     }
 }
 
-// SOAP API client
+// SOAP API client with different interface
 class SoapAPIClient {
     public void login(String username, String password) {
         System.out.println("Logging into SOAP API with username: " + username);
     }
 
     public String retrieveData(String operation) {
-        System.out.println("Retrieving data from SOAP API operation: " + operation);
         return "SOAP API Data";
     }
 }
 
-// Test class interacting directly with APIs
 public class APITest {
-
     public void testRestAPI() {
+        // Problem 1: Direct dependency on REST API interface
         RestAPIClient restClient = new RestAPIClient();
-        restClient.authenticate("testToken"); // REST API authentication
-        String data = restClient.fetchData("/testEndpoint"); // REST API data fetch
-        System.out.println("REST API Response: " + data);
+        restClient.authenticate("token123");
+        restClient.fetchData("/data");
     }
 
     public void testSoapAPI() {
+        // Problem 2: Separate method needed for SOAP API
+        // because interfaces don't match
         SoapAPIClient soapClient = new SoapAPIClient();
-        soapClient.login("testUser", "testPassword"); // SOAP API login
-        String data = soapClient.retrieveData("getDetails"); // SOAP API data fetch
-        System.out.println("SOAP API Response: " + data);
+        soapClient.login("user", "pass");
+        soapClient.retrieveData("getData");
     }
 
-    // Problems:
-    // - Test logic is tightly coupled with the REST and SOAP API interfaces.
-    // - Code duplication: Separate logic for handling each API.
-    // - High maintenance: Changes in API interfaces require updates in all test cases.
+    /* Major Issues:
+     * 1. Duplicate test code for each API type
+     * 2. Different method names for same operations
+     * 3. Can't reuse test logic across API types
+     * 4. Adding new API requires new test methods
+     * 5. No unified way to handle different APIs
+     */
 }

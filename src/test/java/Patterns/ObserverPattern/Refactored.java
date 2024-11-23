@@ -1,87 +1,83 @@
-
-/* In this refactored example, we apply the Observer Pattern. The test execution class (subject)
- notifies multiple observers (logging and notification services) whenever a test event occurs.
- This approach decouples the test execution logic from the observers
- and makes it easy to add or remove observers.*/
-
-import java.util.ArrayList;
-import java.util.List;
-
-// Observer interface
+// Step 1: Create Observer interface
 interface TestObserver {
-    void update(String event);
+    void update(String event, String message);
 }
 
-// Concrete observer for logging events
+// Step 2: Create concrete observers
 class LoggerObserver implements TestObserver {
     @Override
-    public void update(String event) {
-        System.out.println("Log: " + event);
+    public void update(String event, String message) {
+        System.out.println("Log: [" + event + "] " + message);
     }
 }
 
-// Concrete observer for sending notifications
-class NotificationObserver implements TestObserver {
+class EmailObserver implements TestObserver {
     @Override
-    public void update(String event) {
-        System.out.println("Notification: " + event);
+    public void update(String event, String message) {
+        System.out.println("Email: [" + event + "] " + message);
     }
 }
 
-// Subject class that manages test execution and notifies observers
-class TestExecution {
+class SlackObserver implements TestObserver {
+    @Override
+    public void update(String event, String message) {
+        System.out.println("Slack: [" + event + "] " + message);
+    }
+}
 
+// Step 3: Create Subject class
+class TestExecution {
     private List<TestObserver> observers = new ArrayList<>();
 
-    // Method to register observers
     public void addObserver(TestObserver observer) {
         observers.add(observer);
     }
 
-    // Method to remove observers
     public void removeObserver(TestObserver observer) {
         observers.remove(observer);
     }
 
-    // Method to notify all registered observers of an event
-    private void notifyObservers(String event) {
-        for (TestObserver observer : observers) {
-            observer.update(event);
-        }
+    private void notifyObservers(String event, String message) {
+        observers.forEach(observer -> observer.update(event, message));
     }
 
-    // Method that simulates test execution and notifies observers of test events
     public void runTest() {
-        notifyObservers("Test started.");
+        notifyObservers("START", "Test started");
 
         try {
-            // Simulate test logic
-            System.out.println("Executing test steps...");
-            // Assume test passes
+            // Test logic only - no notification code here
+            executeTestSteps();
+            notifyObservers("SUCCESS", "Test passed");
 
-            notifyObservers("Test succeeded.");
         } catch (Exception e) {
-            notifyObservers("Test failed.");
+            notifyObservers("FAILURE", "Test failed: " + e.getMessage());
         }
 
-        notifyObservers("Test completed.");
+        notifyObservers("COMPLETE", "Test completed");
     }
 }
 
-public class Main {
+// Step 4: Usage
+public class TestRunner {
     public static void main(String[] args) {
-        TestExecution testExecution = new TestExecution();
+        TestExecution test = new TestExecution();
 
-        // Register observers
-        testExecution.addObserver(new LoggerObserver());
-        testExecution.addObserver(new NotificationObserver());
+        // Add observers as needed
+        test.addObserver(new LoggerObserver());
+        test.addObserver(new EmailObserver());
+        test.addObserver(new SlackObserver());
 
-        // Run the test (observers will be notified of events)
-        testExecution.runTest();
+        test.runTest();
     }
-
-    // Benefits of Observer Pattern:
-    // - Decouples test execution from logging and notification logic, improving modularity.
-    // - Allows for easy addition or removal of observers without modifying the core test logic.
-    // - Reusable observers that can be attached to multiple tests or subjects as needed.
 }
+
+/*
+Key Changes:
+1. Separated notifications into observers
+2. Clean test execution logic
+3. Easy to add/remove observers
+4. No notification code in test
+5. Flexible notification system
+6. Single point of notification
+7. Configurable observers
+*/

@@ -1,66 +1,70 @@
-
-
-// In this refactored code, the Strategy Pattern is used to encapsulate different login
-// strategies in separate classes, making the login logic modular and maintainable.
-
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 
-// Interface representing the login strategy
+/**
+ * Strategy interface defining the login behavior
+ * Each login type will implement this interface
+ */
 interface LoginStrategy {
     void login(WebDriver driver);
 }
 
-// Strategy for Google login
+/**
+ * Concrete strategy for Google login
+ * Encapsulates all Google-specific login logic
+ */
 class GoogleLoginStrategy implements LoginStrategy {
     @Override
     public void login(WebDriver driver) {
         System.out.println("Logging in with Google");
-        // Logic for Google login
         driver.findElement(By.id("googleLoginButton")).click();
     }
 }
 
-// Strategy for Facebook login
+/**
+ * Concrete strategy for Facebook login
+ * Encapsulates all Facebook-specific login logic
+ */
 class FacebookLoginStrategy implements LoginStrategy {
     @Override
     public void login(WebDriver driver) {
         System.out.println("Logging in with Facebook");
-        // Logic for Facebook login
         driver.findElement(By.id("facebookLoginButton")).click();
     }
 }
 
-// Strategy for Email login
+/**
+ * Concrete strategy for Email login
+ * Encapsulates all Email-specific login logic
+ */
 class EmailLoginStrategy implements LoginStrategy {
     @Override
     public void login(WebDriver driver) {
         System.out.println("Logging in with Email");
-        // Logic for Email login
         driver.findElement(By.id("username")).sendKeys("testUser");
         driver.findElement(By.id("password")).sendKeys("testPassword");
         driver.findElement(By.id("emailLoginButton")).click();
     }
 }
 
-// Context class that uses the chosen login strategy
+/**
+ * Context class that uses the login strategies
+ * Delegates the login behavior to the selected strategy
+ */
 public class LoginTest {
-
     WebDriver driver = new ChromeDriver();
     private LoginStrategy loginStrategy;
 
-    // Method to set the login strategy at runtime
+    // Set the login strategy at runtime
     public void setLoginStrategy(LoginStrategy loginStrategy) {
         this.loginStrategy = loginStrategy;
     }
 
+    // Execute the selected login strategy
     public void performLogin() {
         driver.get("http://example.com/login");
-
         if (loginStrategy != null) {
-            // Using the chosen login strategy
             loginStrategy.login(driver);
         } else {
             System.out.println("No login strategy selected");
@@ -70,23 +74,26 @@ public class LoginTest {
     public static void main(String[] args) {
         LoginTest loginTest = new LoginTest();
 
-        // Example 1: Using Google login strategy
+        // Example usage of different strategies
         loginTest.setLoginStrategy(new GoogleLoginStrategy());
         loginTest.performLogin();
 
-        // Example 2: Using Facebook login strategy
         loginTest.setLoginStrategy(new FacebookLoginStrategy());
         loginTest.performLogin();
 
-        // Example 3: Using Email login strategy
         loginTest.setLoginStrategy(new EmailLoginStrategy());
         loginTest.performLogin();
 
         loginTest.driver.quit();
     }
-
-    // Benefits of Strategy Pattern:
-    // - Each login method is isolated in its own class, improving modularity and reusability.
-    // - Adding a new login method requires creating a new strategy class without modifying the test class.
-    // - The login behavior can be chosen dynamically at runtime, making tests flexible.
 }
+
+/* Benefits of Strategy Pattern:
+ * 1. Each login type is isolated in its own class
+ * 2. Easy to add new login methods
+ * 3. Login behavior can be changed at runtime
+ * 4. Follows Open-Closed Principle
+ * 5. Improved code organization
+ * 6. Better testability
+ * 7. Reusable login strategies
+ */

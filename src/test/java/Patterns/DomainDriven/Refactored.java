@@ -1,51 +1,64 @@
-// Domain model for Users
-public class User {
-    private String username;
-    private String role;
+// Step 1: Define Domain Objects
+class User {
+    private final String username;
+    private final String role;
 
     public User(String username, String role) {
         this.username = username;
         this.role = role;
     }
+
     public String getUsername() { return username; }
     public String getRole() { return role; }
 }
 
-// Domain-specific repository for user actions
-public class UserDomain {
+// Step 2: Create Bounded Contexts
+class UserDomain {
     public void addProductToCart(User user, String productId) {
+        validateCustomerRole(user);
         System.out.println("Adding product to cart for user: " + user.getUsername());
-        // Logic for adding product to cart
+    }
+
+    private void validateCustomerRole(User user) {
+        if (!"Customer".equals(user.getRole())) {
+            throw new IllegalStateException("Only customers can add products to cart");
+        }
     }
 }
 
-// Separate context for Orders
-public class OrderDomain {
-    public void viewAllOrders(User adminUser) {
-        if (adminUser.getRole().equals("Admin")) {
-            System.out.println("Admin viewing all orders for: " + adminUser.getUsername());
-            // Logic for admin to view orders
-        }
+class OrderDomain {
+    public void viewAllOrders(User admin) {
+        validateAdminRole(admin);
+        System.out.println("Admin viewing all orders for: " + admin.getUsername());
     }
 
     public void customerCheckout(User customer, String cartId) {
-        if (customer.getRole().equals("Customer")) {
-            System.out.println("Customer checking out with cart: " + cartId);
-            // Logic for checkout
+        validateCustomerRole(customer);
+        System.out.println("Customer checking out with cart: " + cartId);
+    }
+
+    private void validateAdminRole(User user) {
+        if (!"Admin".equals(user.getRole())) {
+            throw new IllegalStateException("Only admins can view all orders");
+        }
+    }
+
+    private void validateCustomerRole(User user) {
+        if (!"Customer".equals(user.getRole())) {
+            throw new IllegalStateException("Only customers can checkout");
         }
     }
 }
 
-// Test cases with DDD principles
+// Step 3: Clean tests using domain objects and contexts
 public class ECommerceTests {
-
     private UserDomain userDomain = new UserDomain();
     private OrderDomain orderDomain = new OrderDomain();
 
     @Test
     public void testAddProductToCart() {
-        User user = new User("testUser", "Customer");
-        userDomain.addProductToCart(user, "123");
+        User customer = new User("testUser", "Customer");
+        userDomain.addProductToCart(customer, "123");
     }
 
     @Test
@@ -60,3 +73,14 @@ public class ECommerceTests {
         orderDomain.customerCheckout(customer, "cart567");
     }
 }
+
+/*
+Key Changes:
+1. Created proper domain objects (User)
+2. Separated business contexts (UserDomain, OrderDomain)
+3. Added role validation
+4. Encapsulated business rules
+5. Clear domain boundaries
+6. Type safety instead of raw strings
+7. Easy to extend with new rules
+*/

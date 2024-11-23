@@ -1,33 +1,43 @@
-import java.util.ArrayList;
-import java.util.List;
-
 public class TestExecution {
-
     public void runTest() {
+        // Problem 1: Direct logging in test method
         System.out.println("Running test...");
-
-        // Problem 1: Directly handling logging
         System.out.println("Test started.");
 
-        // Test steps...
         try {
-            // Simulate test logic
+            // Test logic
             System.out.println("Executing test steps...");
-            // Assume test passes here
 
-            // Problem 2: Directly handling notifications
+            // Problem 2: Direct notification handling
             System.out.println("Sending success notification...");
+            emailNotification("Test passed");
+            slackNotification("Test passed");
+
         } catch (Exception e) {
-            // Problem 3: Duplicated error handling and notifications
+            // Problem 3: Duplicate notification code
             System.out.println("Test failed.");
-            System.out.println("Sending failure notification...");
+            emailNotification("Test failed");
+            slackNotification("Test failed");
         }
 
         System.out.println("Test completed.");
     }
 
-    // Issues Summary:
-    // - Logging and notification logic are directly embedded in the test method, leading to duplication.
-    // - No flexibility to add or remove logging/notification logic without modifying the test itself.
-    // - Tight coupling between test execution and notification/logging mechanisms.
+    private void emailNotification(String message) {
+        System.out.println("Email: " + message);
+    }
+
+    private void slackNotification(String message) {
+        System.out.println("Slack: " + message);
+    }
+
+    /* Major Issues:
+     * 1. Test logic mixed with logging/notifications
+     * 2. Hard-coded notification methods
+     * 3. Duplicate notification code
+     * 4. Can't add new notifications without changing test
+     * 5. Tight coupling between test and notifications
+     * 6. Hard to maintain or modify notifications
+     * 7. No way to disable specific notifications
+     */
 }

@@ -1,57 +1,51 @@
-//This refactored code example uses the Factory Pattern to centralize WebDriver instantiation,
-//reducing code duplication and improving maintainability.
+// Step 1: Create WebDriver Factory
+class WebDriverFactory {
+    public static WebDriver getDriver(String browserType) {
+        return switch (browserType.toLowerCase()) {
+            case "chrome" -> new ChromeDriver();
+            case "firefox" -> new FirefoxDriver();
+            default -> throw new IllegalArgumentException("Unsupported browser: " + browserType);
+        };
+    }
+}
 
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-
+// Step 2: Use factory in test class
 public class BrowserTest {
+    private WebDriver getDriver(String browser) {
+        return WebDriverFactory.getDriver(browser);
+    }
 
-    // WebDriver Factory class to centralize browser setup
-    static class WebDriverFactory {
-        public static WebDriver getDriver(String browserType) {
-            switch (browserType.toLowerCase()) {
-                case "chrome":
-                    return new ChromeDriver();
-                case "firefox":
-                    return new FirefoxDriver();
-                default:
-                    throw new IllegalArgumentException("Unsupported browser: " + browserType);
-            }
+    public void runTest(String browser) {
+        // Get driver from factory
+        WebDriver driver = getDriver(browser);
+
+        try {
+            driver.get("http://example.com");
+            System.out.println("Running test in " + browser);
+            // Test steps...
+        } finally {
+            driver.quit();
         }
     }
 
+    @Test
     public void testInChrome() {
-        // Using factory to get WebDriver instance - no hardcoding
-        WebDriver driver = WebDriverFactory.getDriver("chrome");
-        driver.get("http://example.com");
-        System.out.println("Running test in Chrome");
-
-        // Test steps here...
-
-        driver.quit(); // Consistent cleanup
+        runTest("chrome");
     }
 
+    @Test
     public void testInFirefox() {
-        // Using factory to get WebDriver instance - no hardcoding
-        WebDriver driver = WebDriverFactory.getDriver("firefox");
-        driver.get("http://example.com");
-        System.out.println("Running test in Firefox");
-
-        // Test steps here...
-
-        driver.quit(); // Consistent cleanup
+        runTest("firefox");
     }
-
-    // Benefits Summary:
-    // - Centralized WebDriver setup in WebDriverFactory class.
-    // - New browsers can be added in one place (WebDriverFactory) without modifying test methods.
-    // - Improved maintainability and scalability.
-    // - Reduced code duplication by using a consistent factory method for WebDriver instantiation.
 }
 
-/*Explanation of Changes
-Centralized WebDriver Instantiation: The WebDriverFactory class handles WebDriver creation, making it easier to add new browsers by updating only the factory method.
-Reduced Duplication: Each test method now uses the WebDriverFactory.getDriver method, reducing code duplication and making the tests cleaner.
-Scalability: If a new browser needs to be added (e.g., Safari), it can be done in the factory class without modifying each test method.
-Consistent Cleanup: All tests now follow a consistent pattern for starting and quitting WebDriver sessions.*/
+/*
+Key Changes:
+1. Centralized WebDriver creation in factory
+2. Single point for driver configuration
+3. Easy to add new browsers
+4. Consistent driver initialization
+5. Dynamic browser selection
+6. Clean test methods
+7. Better error handling
+*/

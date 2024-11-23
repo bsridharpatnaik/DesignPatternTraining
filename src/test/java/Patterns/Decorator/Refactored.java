@@ -1,16 +1,9 @@
-
-/* In this refactored version, the Decorator Pattern is used to wrap the 
-WebDriver object, adding logging and timing behaviors dynamically
-while keeping the test code clean and focused.  */
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-
-// Base interface for WebDriver
+// Step 1: Create a base interface - all decorators will implement this
 interface WebDriverDecorator extends WebDriver {}
 
-// Concrete decorator for logging behavior
+// Step 2: First decorator - Adds logging without changing WebDriver
 class LoggingWebDriver implements WebDriverDecorator {
-    private WebDriver driver;
+    private WebDriver driver;  // Wrapped WebDriver object
 
     public LoggingWebDriver(WebDriver driver) {
         this.driver = driver;
@@ -18,8 +11,16 @@ class LoggingWebDriver implements WebDriverDecorator {
 
     @Override
     public void get(String url) {
+        // Adds logging before and after navigation
         System.out.println("Navigating to: " + url);
         driver.get(url);
+        System.out.println("Navigation completed");
+    }
+
+    @Override
+    public void quit() {
+        System.out.println("Quitting WebDriver");
+        driver.quit();
     }
 
     @Override
@@ -29,23 +30,12 @@ class LoggingWebDriver implements WebDriverDecorator {
         return url;
     }
 
-    @Override
-    public void quit() {
-        System.out.println("Quitting WebDriver");
-        driver.quit();
-    }
-
-    // Other WebDriver methods delegated to the wrapped driver
-    @Override
-    public String getTitle() {
-        return driver.getTitle();
-    }
-    // Implement other WebDriver methods as needed...
+    // Other WebDriver methods simply delegate to wrapped driver
 }
 
-// Concrete decorator for timing behavior
+// Step 3: Second decorator - Adds timing without changing WebDriver or LoggingWebDriver
 class TimingWebDriver implements WebDriverDecorator {
-    private WebDriver driver;
+    private WebDriver driver;  // Can wrap any WebDriver (plain or decorated)
 
     public TimingWebDriver(WebDriver driver) {
         this.driver = driver;
@@ -53,10 +43,11 @@ class TimingWebDriver implements WebDriverDecorator {
 
     @Override
     public void get(String url) {
+        // Adds timing around navigation
         long startTime = System.currentTimeMillis();
         driver.get(url);
         long endTime = System.currentTimeMillis();
-        System.out.println("Navigation to " + url + " took " + (endTime - startTime) + "ms");
+        System.out.println("Navigation took " + (endTime - startTime) + "ms");
     }
 
     @Override
@@ -64,39 +55,34 @@ class TimingWebDriver implements WebDriverDecorator {
         driver.quit();
     }
 
-    // Other WebDriver methods delegated to the wrapped driver
     @Override
     public String getCurrentUrl() {
         return driver.getCurrentUrl();
     }
-
-    @Override
-    public String getTitle() {
-        return driver.getTitle();
-    }
-    // Implement other WebDriver methods as needed...
 }
 
-// Test class using decorated WebDriver
+// Step 4: Clean test class - no logging/timing code in test methods
 public class BrowserTest {
-
     public void testPageNavigation() {
-        WebDriver driver = new TimingWebDriver(new LoggingWebDriver(new ChromeDriver()));
+        // Stack decorators to add both behaviors:
+        // ChromeDriver -> wrapped by LoggingWebDriver -> wrapped by TimingWebDriver
+        WebDriver driver = new TimingWebDriver(
+            new LoggingWebDriver(
+                new ChromeDriver()
+            )
+        );
 
+        // Test method now only contains test logic
         driver.get("http://example.com");
-        System.out.println("Title: " + driver.getTitle());
         driver.quit();
-
-        System.out.println("Test completed: testPageNavigation");
     }
-
-    public static void main(String[] args) {
-        BrowserTest test = new BrowserTest();
-        test.testPageNavigation();
-    }
-
-    // Benefits of Decorator Pattern:
-    // - Logging and timing behaviors are dynamically added to WebDriver without modifying its core logic.
-    // - Test methods remain clean and focused on business logic.
-    // - Additional behaviors (e.g., reporting, screenshot capture) can be added as new decorators.
 }
+
+/*
+Key Changes:
+1. Separated behaviors (logging, timing) into decorator classes
+2. Each decorator adds one behavior without changing WebDriver
+3. Can combine decorators in any order
+4. Test methods contain only test logic
+5. Easy to add new behaviors by creating new decorators
+*/

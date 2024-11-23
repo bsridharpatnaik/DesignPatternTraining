@@ -1,29 +1,38 @@
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-
+/**
+ * Browser factory that violates Open/Closed Principle
+ * Must modify this class to add new browsers
+ */
 public class BrowserFactory {
-
     public WebDriver getDriver(String browserType) {
+        // Problem 1: Conditional logic that needs modification for each new browser
         if (browserType.equalsIgnoreCase("chrome")) {
-            return new ChromeDriver(); // Chrome setup
-        } else if (browserType.equalsIgnoreCase("firefox")) {
-            return new FirefoxDriver(); // Firefox setup
-        } else if (browserType.equalsIgnoreCase("safari")) {
-            // Problem: Adding Safari requires modifying the method
+            return new ChromeDriver();
+        }
+        else if (browserType.equalsIgnoreCase("firefox")) {
+            return new FirefoxDriver();
+        }
+        // Problem 2: Adding safari requires modifying existing code
+        else if (browserType.equalsIgnoreCase("safari")) {
             System.out.println("Safari is not yet supported.");
             return null;
-        } else if (browserType.equalsIgnoreCase("edge")) {
-            // Problem: Adding Edge requires modifying the method
+        }
+        // Problem 3: Adding edge requires modifying existing code
+        else if (browserType.equalsIgnoreCase("edge")) {
             System.out.println("Edge is not yet supported.");
             return null;
-        } else {
+        }
+        else {
             throw new IllegalArgumentException("Unsupported browser: " + browserType);
         }
     }
 
-    // Problems:
-    // - The method needs modification whenever a new browser is added.
-    // - Risk of breaking existing functionality when making changes.
-    // - Violates the Open/Closed Principle.
+    /* Problems:
+     * 1. Must modify class for each new browser
+     * 2. Risk of breaking existing code
+     * 3. Long if-else chain
+     * 4. Not scalable
+     * 5. Hard to maintain
+     * 6. Violates Single Responsibility
+     * 7. Testing becomes complicated
+     */
 }

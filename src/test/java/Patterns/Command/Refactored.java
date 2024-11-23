@@ -1,19 +1,10 @@
-
-/* In this refactored version, each test step (e.g., login, add to cart, logout) 
-is encapsulated as a command. The test class dynamically
-executes commands, improving reusability and flexibility.*/
-
-
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-
-// Command interface
+// Step 1: Create command interface
 interface TestCommand {
     void execute();
+    void undo();
 }
 
-// Concrete command for login
+// Step 2: Create concrete commands
 class LoginCommand implements TestCommand {
     private WebDriver driver;
     private String username;
@@ -27,73 +18,53 @@ class LoginCommand implements TestCommand {
 
     @Override
     public void execute() {
-        System.out.println("Executing LoginCommand...");
         driver.findElement(By.id("username")).sendKeys(username);
         driver.findElement(By.id("password")).sendKeys(password);
         driver.findElement(By.id("loginButton")).click();
     }
-}
-
-// Concrete command for adding a product to the cart
-class AddToCartCommand implements TestCommand {
-    private WebDriver driver;
-
-    public AddToCartCommand(WebDriver driver) {
-        this.driver = driver;
-    }
 
     @Override
-    public void execute() {
-        System.out.println("Executing AddToCartCommand...");
-        driver.findElement(By.id("addToCartButton")).click();
-    }
-}
-
-// Concrete command for logout
-class LogoutCommand implements TestCommand {
-    private WebDriver driver;
-
-    public LogoutCommand(WebDriver driver) {
-        this.driver = driver;
-    }
-
-    @Override
-    public void execute() {
-        System.out.println("Executing LogoutCommand...");
+    public void undo() {
         driver.findElement(By.id("logoutButton")).click();
     }
 }
 
-// Invoker class to manage and execute commands
+// Step 3: Create command executor
 class TestExecutor {
-    public void execute(TestCommand command) {
-        command.execute();
+    private List<TestCommand> commands = new ArrayList<>();
+
+    public void addCommand(TestCommand command) {
+        commands.add(command);
+    }
+
+    public void executeAll() {
+        commands.forEach(TestCommand::execute);
     }
 }
 
-// Test class using the Command Pattern
+// Step 4: Clean test using commands
 public class EcommerceTest {
-
-    public static void main(String[] args) {
+    public void testCheckout() {
         WebDriver driver = new ChromeDriver();
-        driver.get("http://example.com");
-
-        // Create commands
-        TestCommand login = new LoginCommand(driver, "testUser", "testPassword");
-        TestCommand addToCart = new AddToCartCommand(driver);
-        TestCommand logout = new LogoutCommand(driver);
-
-        // Execute commands using TestExecutor
         TestExecutor executor = new TestExecutor();
-        executor.execute(login);
-        executor.execute(addToCart);
-        executor.execute(logout);
 
-        driver.quit();
+        // Add commands in desired sequence
+        executor.addCommand(new LoginCommand(driver, "user", "pass"));
+        executor.addCommand(new AddToCartCommand(driver, "product1"));
+        executor.addCommand(new CheckoutCommand(driver));
 
-        // Benefits of Command Pattern:
-        // - Encapsulates each test step as a reusable command, improving modularity.
-        // - Allows dynamic execution and sequencing of test steps.
-        // - Simplifies adding, removing, or reordering steps without modifying test methods.
+        // Execute all commands
+        executor.executeAll();
     }
 }
+
+/*
+Key Changes:
+1. Each action is a separate command
+2. Commands can be reused across tests
+3. Easy to change command sequence
+4. Support for undo operations
+5. Can batch commands
+6. Easy to add new commands
+7. Clean, maintainable tests
+*/

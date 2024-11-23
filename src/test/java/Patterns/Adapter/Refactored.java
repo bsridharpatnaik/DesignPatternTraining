@@ -1,16 +1,10 @@
-
-
-/*   In this refactored version, the Adapter Pattern is applied to provide a
-unified interface for interacting with both APIs.
-This approach decouples the test logic from the API implementations   */
-
-// Unified interface expected by the test framework
+// Step 1: Create common interface for all APIs
 interface APIAdapter {
     void authenticate(String credentials);
     String fetchData(String query);
 }
 
-// Adapter for REST API
+// Step 2: Adapt REST API to common interface
 class RestAPIAdapter implements APIAdapter {
     private RestAPIClient restClient;
 
@@ -19,17 +13,19 @@ class RestAPIAdapter implements APIAdapter {
     }
 
     @Override
-    public void authenticate(String token) {
-        restClient.authenticate(token);
+    public void authenticate(String credentials) {
+        // Adapt authentication method
+        restClient.authenticate(credentials);
     }
 
     @Override
-    public String fetchData(String endpoint) {
-        return restClient.fetchData(endpoint);
+    public String fetchData(String query) {
+        // Adapt data fetching method
+        return restClient.fetchData(query);
     }
 }
 
-// Adapter for SOAP API
+// Step 3: Adapt SOAP API to same interface
 class SoapAPIAdapter implements APIAdapter {
     private SoapAPIClient soapClient;
 
@@ -39,39 +35,32 @@ class SoapAPIAdapter implements APIAdapter {
 
     @Override
     public void authenticate(String credentials) {
-        // Splitting credentials for SOAP API login
-        String[] creds = credentials.split(":");
-        soapClient.login(creds[0], creds[1]);
+        // Split credentials and adapt to login method
+        String[] parts = credentials.split(":");
+        soapClient.login(parts[0], parts[1]);
     }
 
     @Override
-    public String fetchData(String operation) {
-        return soapClient.retrieveData(operation);
+    public String fetchData(String query) {
+        // Adapt to retrieveData method
+        return soapClient.retrieveData(query);
     }
 }
 
-// Test class using the Adapter Pattern
+// Step 4: Clean test code using unified interface
 public class APITest {
-
-    public void testAPI(APIAdapter adapter) {
-        adapter.authenticate("testUser:testPassword"); // Unified authentication
-        String data = adapter.fetchData("getDetails"); // Unified data fetch
-        System.out.println("API Response: " + data);
-    }
-
-    public static void main(String[] args) {
-        // Testing REST API
-        APIAdapter restAdapter = new RestAPIAdapter(new RestAPIClient());
-        new APITest().testAPI(restAdapter);
-
-        // Testing SOAP API
-        APIAdapter soapAdapter = new SoapAPIAdapter(new SoapAPIClient());
-        new APITest().testAPI(soapAdapter);
-
-        // Benefits:
-        // - Unified interface for interacting with both APIs.
-        // - Decoupled test logic: Test code is independent of API implementations.
-        // - Reusability: The same test logic works for both REST and SOAP APIs.
-        // - Easy to extend: Adding support for a new API requires creating a new adapter.
+    public void testAPI(APIAdapter api) {
+        // Single test method works for all API types
+        api.authenticate("credentials");
+        api.fetchData("query");
     }
 }
+
+/*
+Key Changes:
+1. Created common interface (APIAdapter)
+2. Each adapter converts specific API to common interface
+3. Test code works with any API type
+4. Easy to add new APIs by creating new adapters
+5. Single test method instead of multiple
+*/

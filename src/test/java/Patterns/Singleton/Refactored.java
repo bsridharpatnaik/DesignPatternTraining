@@ -1,68 +1,99 @@
-//In this refactored version, the WebDriverManager class uses the Singleton Pattern to
-//ensure only one instance of WebDriver is created and shared across tests.
-
-
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
-public class BrowserTest {
+/**
+ * Singleton WebDriverManager to ensure single browser instance
+ * Controls the lifecycle of WebDriver across all tests
+ */
+public class WebDriverManager {
+    private static WebDriver driver;  // Single shared instance
+    private static String currentBrowser;  // Track current browser type
 
-    // Singleton WebDriverManager to manage a single WebDriver instance
-    static class WebDriverManager {
-        private static WebDriver driver;
+    // Private constructor prevents direct instantiation
+    private WebDriverManager() {}
 
-        // Private constructor prevents instantiation
-        private WebDriverManager() {}
-
-        // Public method to get the single WebDriver instance
-        public static WebDriver getDriver(String browserType) {
-            if (driver == null) {
-                // Initialize WebDriver only once
-                switch (browserType.toLowerCase()) {
-                    case "chrome":
-                        driver = new ChromeDriver();
-                        break;
-                    case "firefox":
-                        driver = new FirefoxDriver();
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Unsupported browser: " + browserType);
-                }
-            }
-            return driver;
-        }
-
-        // Method to quit WebDriver
-        public static void quitDriver() {
+    /**
+     * Get the single WebDriver instance
+     * Creates new instance only if none exists or browser type changes
+     */
+    public static WebDriver getDriver(String browserType) {
+        if (driver == null || !browserType.equals(currentBrowser)) {
+            // Quit existing driver if browser type changes
             if (driver != null) {
                 driver.quit();
-                driver = null;
             }
+
+            // Initialize new driver based on browser type
+            switch (browserType.toLowerCase()) {
+                case "chrome":
+                    driver = new ChromeDriver();
+                    break;
+                case "firefox":
+                    driver = new FirefoxDriver();
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported browser: " + browserType);
+            }
+            currentBrowser = browserType;
+        }
+        return driver;
+    }
+
+    /**
+     * Clean up WebDriver instance
+     * Should be called after all tests are complete
+     */
+    public static void quitDriver() {
+        if (driver != null) {
+            driver.quit();
+            driver = null;
+            currentBrowser = null;
         }
     }
+}
 
-    public void testLoginInChrome() {
-        // Using Singleton WebDriver instance
+/**
+ * Test class using Singleton WebDriverManager
+ * Benefits from shared WebDriver instance
+ */
+public class BrowserTest {
+    @Before
+    public void setup() {
+        // WebDriver setup happens only once
         WebDriver driver = WebDriverManager.getDriver("chrome");
         driver.get("http://example.com");
+    }
+
+    @Test
+    public void testLoginInChrome() {
+        // Reuses existing Chrome WebDriver
+        WebDriver driver = WebDriverManager.getDriver("chrome");
         System.out.println("Running login test in Chrome");
-
-        // Test steps for login...
+        // Test steps...
     }
 
+    @Test
     public void testLoginInFirefox() {
+        // Automatically handles browser switch
         WebDriver driver = WebDriverManager.getDriver("firefox");
-        driver.get("http://example.com");
         System.out.println("Running login test in Firefox");
-
-        // Test steps for login...
+        // Test steps...
     }
 
-    // After all tests, WebDriverManager.quitDriver() can be called once to close the driver.
-
-    // Benefits Summary:
-    // - Ensures a single instance of WebDriver across multiple tests, saving memory and resources.
-    // - Centralized control over the WebDriver lifecycle with a consistent setup and teardown process.
-    // - Easy to maintain and extend without modifying test code.
+    @AfterClass
+    public static void tearDown() {
+        // Single cleanup for all tests
+        WebDriverManager.quitDriver();
+    }
 }
+
+/* Benefits:
+ * 1. Single WebDriver instance shared across tests
+ * 2. Efficient resource usage
+ * 3. Faster test execution
+ * 4. Centralized browser management
+ * 5. Automatic cleanup
+ * 6. Easy to switch browsers
+ * 7. Thread-safe (can be enhanced with synchronization)
+ */

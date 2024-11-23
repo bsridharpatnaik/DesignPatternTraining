@@ -1,69 +1,70 @@
-
-// In this refactored version, all subclasses adhere to the expectations
-// defined by the base class, ensuring consistent behavior.
-
-
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-
-// Base class for browsers
+/**
+ * Step 1: Define clear contract in base class
+ */
 abstract class Browser {
     abstract WebDriver launchBrowser();
     abstract void quitBrowser(WebDriver driver);
 }
 
-// Subclass for Chrome browser
+/**
+ * Step 2: Chrome implementation following contract
+ */
 class ChromeBrowser extends Browser {
     @Override
     WebDriver launchBrowser() {
-        System.out.println("Launching Chrome browser...");
+        System.out.println("Launching Chrome browser");
         return new ChromeDriver();
     }
 
     @Override
     void quitBrowser(WebDriver driver) {
         driver.quit();
-        System.out.println("Chrome browser quit.");
+        System.out.println("Chrome browser quit");
     }
 }
 
-// Subclass for Firefox browser
+/**
+ * Step 3: Firefox implementation following contract
+ */
 class FirefoxBrowser extends Browser {
     @Override
     WebDriver launchBrowser() {
-        System.out.println("Launching Firefox browser...");
+        System.out.println("Launching Firefox browser");
         return new FirefoxDriver();
     }
 
     @Override
     void quitBrowser(WebDriver driver) {
         driver.quit();
-        System.out.println("Firefox browser quit.");
+        System.out.println("Firefox browser quit");
     }
 }
 
-// Subclass for Headless browser (Correctly Adhering to LSP)
+/**
+ * Step 4: Headless implementation properly following contract
+ */
 class HeadlessBrowser extends Browser {
     @Override
     WebDriver launchBrowser() {
-        System.out.println("Launching headless browser...");
-        // Implement headless browser setup (e.g., Chrome in headless mode)
-        ChromeDriver driver = new ChromeDriver(); // Example: Using ChromeDriver in headless mode
-        driver.manage().window().setSize(new org.openqa.selenium.Dimension(1920, 1080));
-        return driver;
+        System.out.println("Launching headless browser");
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless");
+        return new ChromeDriver(options);  // Returns valid WebDriver
     }
 
     @Override
     void quitBrowser(WebDriver driver) {
         driver.quit();
-        System.out.println("Headless browser quit.");
+        System.out.println("Headless browser quit");
     }
 }
 
+/**
+ * Step 5: Clean client code that works with any browser
+ */
 public class BrowserTest {
-
     public void runTest(Browser browser) {
+        // No extra checks needed - all browsers behave consistently
         WebDriver driver = browser.launchBrowser();
         driver.get("http://example.com");
         System.out.println("Running test...");
@@ -73,14 +74,19 @@ public class BrowserTest {
     public static void main(String[] args) {
         BrowserTest test = new BrowserTest();
 
-        // Works consistently for all subclasses
+        // All browsers can be used interchangeably
         test.runTest(new ChromeBrowser());
         test.runTest(new FirefoxBrowser());
         test.runTest(new HeadlessBrowser());
     }
-
-    // Benefits:
-    // - All subclasses adhere to the expectations of the base class.
-    // - No additional checks are required in the test logic.
-    // - Ensures substitutability: Any subclass can replace the base class without breaking functionality.
 }
+
+/* Benefits of LSP:
+ * 1. Consistent behavior across all subclasses
+ * 2. No special case handling needed
+ * 3. True polymorphism achieved
+ * 4. Code is more reliable
+ * 5. Easy to add new browser types
+ * 6. Clean and maintainable code
+ * 7. Better testing and debugging
+ */
