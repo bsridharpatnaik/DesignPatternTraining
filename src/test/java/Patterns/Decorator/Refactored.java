@@ -1,88 +1,116 @@
-// Step 1: Create a base interface - all decorators will implement this
-interface WebDriverDecorator extends WebDriver {}
-
-// Step 2: First decorator - Adds logging without changing WebDriver
-class LoggingWebDriver implements WebDriverDecorator {
-    private WebDriver driver;  // Wrapped WebDriver object
-
-    public LoggingWebDriver(WebDriver driver) {
-        this.driver = driver;
-    }
-
-    @Override
-    public void get(String url) {
-        // Adds logging before and after navigation
-        System.out.println("Navigating to: " + url);
-        driver.get(url);
-        System.out.println("Navigation completed");
-    }
-
-    @Override
-    public void quit() {
-        System.out.println("Quitting WebDriver");
-        driver.quit();
-    }
-
-    @Override
-    public String getCurrentUrl() {
-        String url = driver.getCurrentUrl();
-        System.out.println("Current URL: " + url);
-        return url;
-    }
-
-    // Other WebDriver methods simply delegate to wrapped driver
+/**
+ * We need to add screenshot capture and logging capabilities to our test execution without modifying the existing test code.
+ * Basic interface for test actions
+ */
+interface TestRunner {
+    void runTest();
 }
 
-// Step 3: Second decorator - Adds timing without changing WebDriver or LoggingWebDriver
-class TimingWebDriver implements WebDriverDecorator {
-    private WebDriver driver;  // Can wrap any WebDriver (plain or decorated)
-
-    public TimingWebDriver(WebDriver driver) {
-        this.driver = driver;
-    }
-
+/**
+ * Basic test implementation without any extras
+ */
+class BasicTestRunner implements TestRunner {
     @Override
-    public void get(String url) {
-        // Adds timing around navigation
-        long startTime = System.currentTimeMillis();
-        driver.get(url);
-        long endTime = System.currentTimeMillis();
-        System.out.println("Navigation took " + (endTime - startTime) + "ms");
-    }
-
-    @Override
-    public void quit() {
-        driver.quit();
-    }
-
-    @Override
-    public String getCurrentUrl() {
-        return driver.getCurrentUrl();
+    public void runTest() {
+        System.out.println("Running basic test");
     }
 }
 
-// Step 4: Clean test class - no logging/timing code in test methods
-public class BrowserTest {
-    public void testPageNavigation() {
-        // Stack decorators to add both behaviors:
-        // ChromeDriver -> wrapped by LoggingWebDriver -> wrapped by TimingWebDriver
-        WebDriver driver = new TimingWebDriver(
-            new LoggingWebDriver(
-                new ChromeDriver()
+/**
+ * Base decorator class - all test enhancements extend this
+ */
+class TestDecorator implements TestRunner {
+    protected TestRunner testRunner;
+
+    public TestDecorator(TestRunner testRunner) {
+        this.testRunner = testRunner;
+    }
+
+    @Override
+    public void runTest() {
+        testRunner.runTest();
+    }
+}
+
+/**
+ * Decorator that adds screenshot capability
+ */
+class ScreenshotDecorator extends TestDecorator {
+    public ScreenshotDecorator(TestRunner testRunner) {
+        super(testRunner);
+    }
+
+    @Override
+    public void runTest() {
+        takeScreenshotBefore();
+        testRunner.runTest();
+        takeScreenshotAfter();
+    }
+
+    private void takeScreenshotBefore() {
+        System.out.println("Taking screenshot before test");
+    }
+
+    private void takeScreenshotAfter() {
+        System.out.println("Taking screenshot after test");
+    }
+}
+
+/**
+ * Decorator that adds logging capability
+ */
+class LoggingDecorator extends TestDecorator {
+    public LoggingDecorator(TestRunner testRunner) {
+        super(testRunner);
+    }
+
+    @Override
+    public void runTest() {
+        log("Starting test");
+        testRunner.runTest();
+        log("Test completed");
+    }
+
+    private void log(String message) {
+        System.out.println("LOG: " + message);
+    }
+}
+
+/**
+ * Example usage showing how to use decorators in test automation
+ */
+public class AutomatedTest {
+    public static void main(String[] args) {
+        // Basic test without any decoration
+        System.out.println("Running basic test:");
+        TestRunner basic = new BasicTestRunner();
+        basic.runTest();
+
+        System.out.println("\nRunning test with screenshots:");
+        // Test with screenshots
+        TestRunner withScreenshots = new ScreenshotDecorator(new BasicTestRunner());
+        withScreenshots.runTest();
+
+        System.out.println("\nRunning test with screenshots and logging:");
+        // Test with both screenshots and logging
+        TestRunner withScreenshotsAndLogs = new LoggingDecorator(
+            new ScreenshotDecorator(
+                new BasicTestRunner()
             )
         );
-
-        // Test method now only contains test logic
-        driver.get("http://example.com");
-        driver.quit();
+        withScreenshotsAndLogs.runTest();
     }
 }
 
-/*
-Key Changes:
-1. Separated behaviors (logging, timing) into decorator classes
-2. Each decorator adds one behavior without changing WebDriver
-3. Can combine decorators in any order
-4. Test methods contain only test logic
-5. Easy to add new behaviors by creating new decorators
-*/
+/* How Decorator Pattern helps in Test Automation:
+ * 1. Start with basic test runner
+ * 2. Add screenshots when needed
+ * 3. Add logging when needed
+ * 4. Can combine features as required
+ *
+ * Benefits:
+ * 1. Add features without changing existing test code
+ * 2. Mix and match features as needed for different tests
+ * 3. Keep test logic clean and focused
+ * 4. Easy to add new features (retry, reporting, timing, etc.)
+ */

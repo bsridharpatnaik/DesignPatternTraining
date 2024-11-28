@@ -1,76 +1,66 @@
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
+/** We need to add screenshot capture and logging capabilities to our test execution without modifying the existing test code.
+ * Bad implementation with mixed responsibilities
+ * and hard-coded features
+ */
+public class TestRunner {
+    private boolean takeScreenshots;
+    private boolean enableLogging;
 
-public class BrowserTest {
-    public void testPageNavigation() {
-        // Problem 1: Logging code mixed with test logic
-        // This makes the test method do too many things (violates Single Responsibility Principle)
-        System.out.println("Starting test: testPageNavigation");
-
-        // Problem 2: Performance measurement code scattered in test
-        // Timing logic is duplicated across all test methods
-        long startTime = System.currentTimeMillis();
-
-        // Problem 3: Direct WebDriver instantiation
-        // No way to easily swap out or enhance WebDriver behavior
-        WebDriver driver = new ChromeDriver();
-
-        // Problem 4: Basic actions mixed with logging
-        // Each action requires multiple lines of logging code
-        driver.get("http://example.com");
-        System.out.println("Navigated to: " + driver.getCurrentUrl());
-
-        // Problem 5: Manual time calculation
-        // Duplicated across methods, prone to errors
-        long endTime = System.currentTimeMillis();
-        System.out.println("Execution time: " + (endTime - startTime) + "ms");
-
-        driver.quit();
-        System.out.println("Test completed: testPageNavigation");
+    // Problem 1: Constructor with multiple flags
+    public TestRunner(boolean takeScreenshots, boolean enableLogging) {
+        this.takeScreenshots = takeScreenshots;
+        this.enableLogging = enableLogging;
     }
 
-    public void testAnotherPage() {
-        // Problem 6: Copy-pasted code
-        // Same logging and timing code duplicated
-        System.out.println("Starting test: testAnotherPage");
-        long startTime = System.currentTimeMillis();
+    public void runTest() {
+        // Problem 2: Mixed responsibilities and messy conditional logic
+        if (enableLogging) {
+            System.out.println("LOG: Starting test");
+        }
 
-        // Problem 7: No way to enforce consistent logging
-        // Each developer might log differently
-        WebDriver driver = new ChromeDriver();
-        driver.get("http://example.com/another");
-        System.out.println("Navigated to: " + driver.getCurrentUrl());
+        if (takeScreenshots) {
+            System.out.println("Taking screenshot before test");
+        }
 
-        long endTime = System.currentTimeMillis();
-        System.out.println("Execution time: " + (endTime - startTime) + "ms");
+        // Actual test logic mixed with other concerns
+        System.out.println("Running basic test");
 
-        driver.quit();
-        System.out.println("Test completed: testAnotherPage");
+        if (takeScreenshots) {
+            System.out.println("Taking screenshot after test");
+        }
+
+        if (enableLogging) {
+            System.out.println("LOG: Test completed");
+        }
     }
-
-    /* Major Issues:
-     * 1. Violation of DRY (Don't Repeat Yourself) principle
-     *    - Same logging and timing code copy-pasted everywhere
-     *    - Any change in logging format needs changes in all test methods
-     *
-     * 2. Violation of Single Responsibility Principle
-     *    - Test methods handle testing, logging, and performance measurement
-     *    - Makes methods longer and harder to maintain
-     *
-     * 3. Poor Maintainability
-     *    - Adding new behavior (like screenshots on failure) requires modifying all test methods
-     *    - Changing logging format means updating many places
-     *
-     * 4. Limited Reusability
-     *    - Can't easily reuse logging or timing behavior in other tests
-     *    - No way to selectively apply behaviors to different tests
-     *
-     * 5. Poor Flexibility
-     *    - Can't enable/disable logging or timing without changing test code
-     *    - Hard to add new cross-cutting concerns
-     *
-     * 6. Testing Complexity
-     *    - Hard to unit test the actual test logic
-     *    - Logging and timing code gets in the way
-     */
 }
+
+/**
+ * Example of problematic usage
+ */
+public class BadTestExample {
+    public static void main(String[] args) {
+        // Problem 3: Have to create different instances for different combinations
+        TestRunner basicTest = new TestRunner(false, false);
+        basicTest.runTest();
+
+        TestRunner testWithScreenshots = new TestRunner(true, false);
+        testWithScreenshots.runTest();
+
+        TestRunner testWithLogs = new TestRunner(false, true);
+        testWithLogs.runTest();
+
+        TestRunner testWithBoth = new TestRunner(true, true);
+        testWithBoth.runTest();
+    }
+}
+
+/* Problems with this approach:
+ * 1. Features are tightly coupled within TestRunner
+ * 2. Adding new features requires modifying TestRunner class
+ * 3. Messy conditional logic
+ * 4. Hard to maintain and extend
+ * 5. Can't add features dynamically
+ * 6. Need different instances for different feature combinations
+ * 7. No separation of concerns
+ */
