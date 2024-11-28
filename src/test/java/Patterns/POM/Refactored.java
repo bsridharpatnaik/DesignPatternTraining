@@ -1,8 +1,14 @@
-// Step 1: Create Page Object
+/**
+ * Page Object Pattern for Login Page
+ * Encapsulates page structure and behavior
+ */
 class LoginPage {
     private final WebDriver driver;
 
-    // Centralized locators
+    /**
+     * Locators centralized in one place
+     * Easy to update if UI changes
+     */
     private final By usernameField = By.id("username");
     private final By passwordField = By.id("password");
     private final By loginButton = By.id("loginButton");
@@ -13,7 +19,10 @@ class LoginPage {
         this.driver = driver;
     }
 
-    // Step 2: Page interactions as methods
+    /**
+     * Low-level page interactions
+     * Each method handles one specific element interaction
+     */
     public void enterUsername(String username) {
         driver.findElement(usernameField).sendKeys(username);
     }
@@ -34,7 +43,10 @@ class LoginPage {
         return driver.findElement(errorMessage).isDisplayed();
     }
 
-    // Step 3: Business-level operations
+    /**
+     * High-level business operation
+     * Combines multiple low-level actions
+     */
     public void login(String username, String password) {
         enterUsername(username);
         enterPassword(password);
@@ -42,7 +54,10 @@ class LoginPage {
     }
 }
 
-// Step 4: Clean test class
+/**
+ * Test class using Page Object
+ * Shows clean separation of test logic and page interactions
+ */
 public class LoginTests {
     private WebDriver driver;
     private LoginPage loginPage;
@@ -54,6 +69,10 @@ public class LoginTests {
         loginPage = new LoginPage(driver);
     }
 
+    /**
+     * Test methods focus on business logic
+     * Page interaction details hidden in Page Object
+     */
     @Test
     public void testValidLogin() {
         loginPage.login("validUser", "validPassword");
@@ -72,13 +91,19 @@ public class LoginTests {
     }
 }
 
-/*
-Key Changes:
-1. Centralized locators in page object
-2. Separated page interactions from tests
-3. Reusable page methods
-4. Clean test methods
-5. Consistent element handling
-6. Easy maintenance
-7. Better test organization
-*/
+/* How Page Object Pattern Helps:
+ * 1. Structure:
+ *    - Page elements in one place
+ *    - Easy to update locators
+ *    - Reusable page methods
+ *
+ * 2. Maintenance:
+ *    - UI changes only affect page object
+ *    - Tests remain stable
+ *    - Single point of update
+ *
+ * 3. Test Quality:
+ *    - Clean, readable tests
+ *    - Business-focused test methods
+ *    - Reduced code duplication
+ */

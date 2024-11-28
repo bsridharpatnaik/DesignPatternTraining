@@ -1,5 +1,11 @@
 /**
- * User entity with required fields
+ * Test Data Pattern Example
+ * Shows separation of test data creation from test logic
+ */
+
+/**
+ * Basic user entity with common fields
+ * Core class that will be used in tests
  */
 public class User {
     private String username;
@@ -8,11 +14,12 @@ public class User {
     private String role;
     private boolean active;
     private LocalDateTime lastLogin;
-    // Getters and setters omitted
+    // Getters/setters omitted
 }
 
 /**
- * Builder for creating User objects with sensible defaults
+ * Builder for flexible User object creation
+ * Provides sensible defaults and fluent interface
  */
 public class UserBuilder {
     private String username;
@@ -23,7 +30,7 @@ public class UserBuilder {
     private LocalDateTime lastLogin;
 
     private UserBuilder() {
-        // Set default values
+        // Default values for all fields
         this.username = "defaultUser";
         this.password = "defaultPass123";
         this.role = "USER";
@@ -31,13 +38,15 @@ public class UserBuilder {
         this.lastLogin = LocalDateTime.now();
     }
 
+    // Factory method for builder creation
     public static UserBuilder aUser() {
         return new UserBuilder();
     }
 
+    // Builder methods for customization
     public UserBuilder withUsername(String username) {
         this.username = username;
-        this.email = username + "@test.com"; // Auto-generate email
+        this.email = username + "@test.com";  // Convention for test emails
         return this;
     }
 
@@ -51,6 +60,7 @@ public class UserBuilder {
         return this;
     }
 
+    // Creates final User object
     public User build() {
         User user = new User();
         user.setUsername(username);
@@ -64,13 +74,16 @@ public class UserBuilder {
 }
 
 /**
- * Factory for common test data scenarios
+ * Factory providing common test data scenarios
+ * Central place for test data creation
  */
 public class UserTestDataFactory {
+    // Common scenario: Standard user
     public static User standardUser() {
         return UserBuilder.aUser().build();
     }
 
+    // Common scenario: Admin user
     public static User adminUser() {
         return UserBuilder.aUser()
             .withUsername("admin")
@@ -78,12 +91,14 @@ public class UserTestDataFactory {
             .build();
     }
 
+    // Common scenario: Inactive user
     public static User inactiveUser() {
         return UserBuilder.aUser()
             .withActive(false)
             .build();
     }
 
+    // Utility method: Create multiple users
     public static List<User> multipleUsers(int count) {
         return IntStream.range(0, count)
             .mapToObj(i -> UserBuilder.aUser()
@@ -94,40 +109,47 @@ public class UserTestDataFactory {
 }
 
 /**
- * Clean tests using test data patterns
+ * Example test class showing different ways to create test data
  */
 public class UserTests {
     @Test
     public void testAdminLogin() {
-        // Using factory for common scenario
+        // Using factory for standard scenario
         User admin = UserTestDataFactory.adminUser();
-        // Test admin login...
+        verifyAdminAccess(admin);
     }
 
     @Test
-    public void testCustomScenario() {
-        // Using builder for specific needs
-        User custom = UserBuilder.aUser()
-            .withUsername("custom")
+    public void testCustomUser() {
+        // Using builder for specific requirements
+        User manager = UserBuilder.aUser()
+            .withUsername("manager")
             .withRole("MANAGER")
             .build();
-        // Test with custom user...
+        verifyManagerAccess(manager);
     }
 
     @Test
     public void testMultipleUsers() {
-        // Using factory for bulk creation
+        // Using factory for bulk data
         List<User> users = UserTestDataFactory.multipleUsers(3);
-        // Test with multiple users...
+        verifyBulkOperations(users);
     }
 }
 
-/* Benefits:
- * 1. Centralized test data creation
- * 2. Consistent default values
- * 3. Fluent builder interface
- * 4. Reusable test data scenarios
- * 5. Easy maintenance
- * 6. Clean, readable tests
- * 7. Flexible test data creation
+/* Pattern Benefits:
+ * 1. Test Data Creation:
+ *    - Centralized data creation
+ *    - Consistent test data
+ *    - Reusable scenarios
+ *
+ * 2. Test Clarity:
+ *    - Clear test intent
+ *    - Readable test setup
+ *    - Maintainable test data
+ *
+ * 3. Test Flexibility:
+ *    - Easy to create variations
+ *    - Support for edge cases
+ *    - Bulk data creation
  */

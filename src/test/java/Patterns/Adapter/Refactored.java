@@ -1,10 +1,49 @@
-// Step 1: Create common interface for all APIs
+/**
+ * Problem: Different APIs have different interfaces
+ * Solution: Create a common interface and adapt each API to it
+ */
+
+/**
+ * Common interface that all APIs will adapt to
+ * Defines standard methods for authentication and data fetching
+ */
 interface APIAdapter {
-    void authenticate(String credentials);
-    String fetchData(String query);
+    void authenticate(String credentials);  // Common auth method
+    String fetchData(String query);        // Common data fetch method
 }
 
-// Step 2: Adapt REST API to common interface
+/**
+ * Original REST API client we need to adapt
+ * Has its own specific interface
+ */
+class RestAPIClient {
+    void authenticate(String token) {
+        System.out.println("REST Auth with token: " + token);
+    }
+
+    String fetchData(String endpoint) {
+        return "REST Data from: " + endpoint;
+    }
+}
+
+/**
+ * Original SOAP API client we need to adapt
+ * Has different method names and signatures
+ */
+class SoapAPIClient {
+    void login(String username, String password) {
+        System.out.println("SOAP Login: " + username);
+    }
+
+    String retrieveData(String operation) {
+        return "SOAP Data from: " + operation;
+    }
+}
+
+/**
+ * Adapter for REST API
+ * Implements common interface while using REST client
+ */
 class RestAPIAdapter implements APIAdapter {
     private RestAPIClient restClient;
 
@@ -14,18 +53,21 @@ class RestAPIAdapter implements APIAdapter {
 
     @Override
     public void authenticate(String credentials) {
-        // Adapt authentication method
+        // Simply pass through as REST already uses tokens
         restClient.authenticate(credentials);
     }
 
     @Override
     public String fetchData(String query) {
-        // Adapt data fetching method
+        // Direct mapping as REST interface is similar
         return restClient.fetchData(query);
     }
 }
 
-// Step 3: Adapt SOAP API to same interface
+/**
+ * Adapter for SOAP API
+ * Shows more complex adaptation when interfaces differ significantly
+ */
 class SoapAPIAdapter implements APIAdapter {
     private SoapAPIClient soapClient;
 
@@ -35,32 +77,53 @@ class SoapAPIAdapter implements APIAdapter {
 
     @Override
     public void authenticate(String credentials) {
-        // Split credentials and adapt to login method
+        // Transform single credential string into username/password
         String[] parts = credentials.split(":");
         soapClient.login(parts[0], parts[1]);
     }
 
     @Override
     public String fetchData(String query) {
-        // Adapt to retrieveData method
+        // Adapt query format for SOAP
         return soapClient.retrieveData(query);
     }
 }
 
-// Step 4: Clean test code using unified interface
+/**
+ * Test class showing how adapters enable uniform API usage
+ */
 public class APITest {
     public void testAPI(APIAdapter api) {
-        // Single test method works for all API types
-        api.authenticate("credentials");
-        api.fetchData("query");
+        // Same code works with any API implementation
+        api.authenticate("test:password");
+        String data = api.fetchData("getUserData");
+        System.out.println(data);
+    }
+
+    public static void main(String[] args) {
+        APITest test = new APITest();
+
+        // Using REST API
+        RestAPIAdapter restAdapter = new RestAPIAdapter(new RestAPIClient());
+        test.testAPI(restAdapter);
+
+        // Using SOAP API with same test code
+        SoapAPIAdapter soapAdapter = new SoapAPIAdapter(new SoapAPIClient());
+        test.testAPI(soapAdapter);
     }
 }
 
-/*
-Key Changes:
-1. Created common interface (APIAdapter)
-2. Each adapter converts specific API to common interface
-3. Test code works with any API type
-4. Easy to add new APIs by creating new adapters
-5. Single test method instead of multiple
-*/
+/* How Adapter Pattern Helps:
+ * 1. Creates uniform interface for different APIs
+ * 2. Test code doesn't need to know API specifics
+ * 3. Easy to add support for new API types:
+ *    - Create new adapter class
+ *    - Implement common interface
+ *    - Handle conversions inside adapter
+ *
+ * Real-World Benefits:
+ * 1. Can switch APIs without changing test code
+ * 2. Simpler test maintenance
+ * 3. Support multiple API versions
+ * 4. Clean separation of concerns
+ */

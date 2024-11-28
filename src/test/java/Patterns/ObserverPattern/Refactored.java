@@ -1,9 +1,20 @@
-// Step 1: Create Observer interface
+/**
+ * Observer Pattern in Test Automation
+ * Separates test execution from notification logic
+ */
+
+/**
+ * Observer interface defining notification contract
+ * All notification handlers must implement this
+ */
 interface TestObserver {
-    void update(String event, String message);
+    void update(String event, String message);  // Method called when test events occur
 }
 
-// Step 2: Create concrete observers
+/**
+ * Logs test events to console/file
+ * Can be extended for different logging implementations
+ */
 class LoggerObserver implements TestObserver {
     @Override
     public void update(String event, String message) {
@@ -11,24 +22,38 @@ class LoggerObserver implements TestObserver {
     }
 }
 
+/**
+ * Sends test notifications via email
+ * Useful for critical test failures
+ */
 class EmailObserver implements TestObserver {
     @Override
     public void update(String event, String message) {
+        // Could implement actual email sending here
         System.out.println("Email: [" + event + "] " + message);
     }
 }
 
+/**
+ * Sends test notifications to Slack
+ * Good for team-wide test status updates
+ */
 class SlackObserver implements TestObserver {
     @Override
     public void update(String event, String message) {
+        // Could implement actual Slack API call here
         System.out.println("Slack: [" + event + "] " + message);
     }
 }
 
-// Step 3: Create Subject class
+/**
+ * Main test execution class (Subject)
+ * Handles test execution and notifies observers of events
+ */
 class TestExecution {
     private List<TestObserver> observers = new ArrayList<>();
 
+    // Observer management methods
     public void addObserver(TestObserver observer) {
         observers.add(observer);
     }
@@ -37,15 +62,20 @@ class TestExecution {
         observers.remove(observer);
     }
 
+    // Notify all observers of test events
     private void notifyObservers(String event, String message) {
         observers.forEach(observer -> observer.update(event, message));
     }
 
+    /**
+     * Main test execution method
+     * Only focuses on test logic, notifications handled by observers
+     */
     public void runTest() {
         notifyObservers("START", "Test started");
 
         try {
-            // Test logic only - no notification code here
+            // Core test logic
             executeTestSteps();
             notifyObservers("SUCCESS", "Test passed");
 
@@ -57,27 +87,35 @@ class TestExecution {
     }
 }
 
-// Step 4: Usage
+/**
+ * Example usage showing how to configure and use observers
+ */
 public class TestRunner {
     public static void main(String[] args) {
         TestExecution test = new TestExecution();
 
-        // Add observers as needed
-        test.addObserver(new LoggerObserver());
-        test.addObserver(new EmailObserver());
-        test.addObserver(new SlackObserver());
+        // Attach different types of observers
+        test.addObserver(new LoggerObserver());    // For logging
+        test.addObserver(new EmailObserver());     // For email notifications
+        test.addObserver(new SlackObserver());     // For Slack updates
 
+        // Run test - observers automatically notified
         test.runTest();
     }
 }
 
-/*
-Key Changes:
-1. Separated notifications into observers
-2. Clean test execution logic
-3. Easy to add/remove observers
-4. No notification code in test
-5. Flexible notification system
-6. Single point of notification
-7. Configurable observers
-*/
+/* How Observer Pattern Helps in Testing:
+ * 1. Separation of Concerns:
+ *    - Test logic separate from notifications
+ *    - Each observer handles one type of notification
+ *
+ * 2. Flexibility:
+ *    - Easy to add/remove notification methods
+ *    - Can configure different observers for different tests
+ *
+ * Common Use Cases:
+ * - Test reporting
+ * - Real-time notifications
+ * - Test monitoring
+ * - Custom logging
+ */

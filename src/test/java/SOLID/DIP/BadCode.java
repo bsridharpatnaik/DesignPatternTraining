@@ -1,29 +1,28 @@
 /**
- * TestRunner class with tight coupling to concrete implementations
+ * AutomatedTest class with tight coupling to concrete implementations
  * Violates Dependency Inversion Principle
  */
-public class TestRunner {
-    // Problem 1: Direct dependencies on concrete classes
-    private ChromeDriver driver;
-    private MySQLDatabase database;
-    private HtmlReporter reporter;
+ public class AutomatedTest {
+     private ChromeDriver driver;            // Directly using ChromeDriver
+     private MySQLTestData testData;         // Directly using MySQL
+     private ExtentReporter reporter;        // Directly using Extent Reports
 
-    public TestRunner() {
-        // Problem 2: Direct instantiation of concrete classes
-        this.driver = new ChromeDriver();
-        this.database = new MySQLDatabase();
-        this.reporter = new HtmlReporter();
-    }
+     public AutomatedTest() {
+         // Hard-coded dependencies
+         this.driver = new ChromeDriver();
+         this.testData = new MySQLTestData();
+         this.reporter = new ExtentReporter();
+     }
 
-    public void runTest() {
-        // Problem 3: Direct usage of concrete implementations
-        driver.get("https://example.com");
-        database.query("SELECT * FROM test_data");
-        reporter.generateReport("Test Results");
-    }
-
+     public void runLoginTest() {
+         // Test directly depends on specific implementations
+         testData.loadTestData("login_data");
+         driver.get("https://example.com");
+         reporter.logStep("Navigated to website");
+         // More test steps...
+     }
     /* Problems:
-     * 1. High-level module (TestRunner) depends on low-level modules
+     * 1. High-level module (AutomatedTest) depends on low-level modules
      * 2. Hard to switch implementations (e.g., Firefox, PostgreSQL)
      * 3. Difficult to mock for unit testing
      * 4. Tight coupling makes code rigid and hard to change

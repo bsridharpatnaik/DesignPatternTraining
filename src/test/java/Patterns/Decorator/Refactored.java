@@ -1,13 +1,19 @@
 /**
- * We need to add screenshot capture and logging capabilities to our test execution without modifying the existing test code.
- * Basic interface for test actions
+ * Example of Decorator Pattern in Test Automation
+ * Goal: Add test features (screenshots, logging) without modifying core test code
+ */
+
+/**
+ * Base interface - defines core test behavior
+ * All decorators must implement this interface
  */
 interface TestRunner {
-    void runTest();
+    void runTest();  // Core test method
 }
 
 /**
- * Basic test implementation without any extras
+ * Basic implementation without any extra features
+ * This is what we'll decorate with additional behaviors
  */
 class BasicTestRunner implements TestRunner {
     @Override
@@ -17,10 +23,11 @@ class BasicTestRunner implements TestRunner {
 }
 
 /**
- * Base decorator class - all test enhancements extend this
+ * Base decorator class that all feature decorators extend
+ * Implements TestRunner and holds reference to decorated object
  */
 class TestDecorator implements TestRunner {
-    protected TestRunner testRunner;
+    protected TestRunner testRunner;  // Holds the decorated TestRunner
 
     public TestDecorator(TestRunner testRunner) {
         this.testRunner = testRunner;
@@ -28,12 +35,14 @@ class TestDecorator implements TestRunner {
 
     @Override
     public void runTest() {
+        // Default behavior: just run the decorated test
         testRunner.runTest();
     }
 }
 
 /**
- * Decorator that adds screenshot capability
+ * Screenshot capability decorator
+ * Adds screenshot taking before and after test execution
  */
 class ScreenshotDecorator extends TestDecorator {
     public ScreenshotDecorator(TestRunner testRunner) {
@@ -42,9 +51,9 @@ class ScreenshotDecorator extends TestDecorator {
 
     @Override
     public void runTest() {
-        takeScreenshotBefore();
-        testRunner.runTest();
-        takeScreenshotAfter();
+        takeScreenshotBefore();     // Added behavior before
+        testRunner.runTest();       // Original test execution
+        takeScreenshotAfter();      // Added behavior after
     }
 
     private void takeScreenshotBefore() {
@@ -57,7 +66,8 @@ class ScreenshotDecorator extends TestDecorator {
 }
 
 /**
- * Decorator that adds logging capability
+ * Logging capability decorator
+ * Adds log messages before and after test execution
  */
 class LoggingDecorator extends TestDecorator {
     public LoggingDecorator(TestRunner testRunner) {
@@ -66,9 +76,9 @@ class LoggingDecorator extends TestDecorator {
 
     @Override
     public void runTest() {
-        log("Starting test");
-        testRunner.runTest();
-        log("Test completed");
+        log("Starting test");      // Added behavior before
+        testRunner.runTest();      // Original test execution
+        log("Test completed");     // Added behavior after
     }
 
     private void log(String message) {
@@ -77,22 +87,21 @@ class LoggingDecorator extends TestDecorator {
 }
 
 /**
- * Example usage showing how to use decorators in test automation
+ * Example showing different ways to use decorators
+ * Demonstrates how features can be combined flexibly
  */
 public class AutomatedTest {
     public static void main(String[] args) {
-        // Basic test without any decoration
-        System.out.println("Running basic test:");
+        // 1. Basic test - no decorations
         TestRunner basic = new BasicTestRunner();
         basic.runTest();
 
-        System.out.println("\nRunning test with screenshots:");
-        // Test with screenshots
+        // 2. Test with screenshots only
         TestRunner withScreenshots = new ScreenshotDecorator(new BasicTestRunner());
         withScreenshots.runTest();
 
-        System.out.println("\nRunning test with screenshots and logging:");
-        // Test with both screenshots and logging
+        // 3. Test with both screenshots and logging
+        // Note how decorators are stacked
         TestRunner withScreenshotsAndLogs = new LoggingDecorator(
             new ScreenshotDecorator(
                 new BasicTestRunner()
@@ -102,15 +111,16 @@ public class AutomatedTest {
     }
 }
 
-/* How Decorator Pattern helps in Test Automation:
- * 1. Start with basic test runner
- * 2. Add screenshots when needed
- * 3. Add logging when needed
- * 4. Can combine features as required
+/* How It Works:
+ * 1. Each decorator wraps a TestRunner and adds its behavior
+ * 2. Decorators can be stacked in any order
+ * 3. Core test logic remains unchanged
+ * 4. Each feature is isolated in its own decorator
  *
- * Benefits:
- * 1. Add features without changing existing test code
- * 2. Mix and match features as needed for different tests
- * 3. Keep test logic clean and focused
- * 4. Easy to add new features (retry, reporting, timing, etc.)
+ * Common Use Cases:
+ * 1. Adding retry logic for flaky tests
+ * 2. Performance monitoring
+ * 3. Error screenshots
+ * 4. Test logging
+ * 5. Report generation
  */

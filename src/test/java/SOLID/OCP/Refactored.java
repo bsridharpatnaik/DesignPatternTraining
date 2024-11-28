@@ -1,19 +1,27 @@
 /**
- * Step 1: Define browser interface
- * New browsers will implement this interface
+ * Open/Closed Principle Example in Test Automation
+ * Shows how to add new browser support without modifying existing code
+ */
+
+/**
+ * Browser interface - the key to extensibility
+ * New browser types only need to implement this interface
+ * This is what makes our code "Open for extension"
  */
 interface Browser {
-    WebDriver createDriver();
+    WebDriver createDriver();  // Single responsibility: create a WebDriver instance
 }
 
 /**
- * Step 2: Create concrete browser classes
- * Each browser has its own implementation
+ * Concrete browser implementations
+ * Each class handles its specific browser setup
+ * This is where we extend functionality without modifying existing code
  */
 class ChromeBrowser implements Browser {
     @Override
     public WebDriver createDriver() {
         System.out.println("Setting up Chrome browser");
+        // Chrome-specific setup can be added here
         return new ChromeDriver();
     }
 }
@@ -22,6 +30,7 @@ class FirefoxBrowser implements Browser {
     @Override
     public WebDriver createDriver() {
         System.out.println("Setting up Firefox browser");
+        // Firefox-specific setup can be added here
         return new FirefoxDriver();
     }
 }
@@ -30,25 +39,31 @@ class SafariBrowser implements Browser {
     @Override
     public WebDriver createDriver() {
         System.out.println("Setting up Safari browser");
-        return new SafariDriver();  // Safari implementation
+        // Safari-specific setup can be added here
+        return new SafariDriver();
     }
 }
 
 /**
- * Step 3: Create factory using browser registry
- * No modification needed for new browsers
+ * BrowserFactory - manages browser creation
+ * This class is "Closed for modification"
+ * New browsers can be added without changing this code
  */
 class BrowserFactory {
+    // Registry of all supported browsers
     private final Map<String, Browser> browsers = new HashMap<>();
 
     public BrowserFactory() {
-        // Register known browsers
+        // Register default browsers
         browsers.put("chrome", new ChromeBrowser());
         browsers.put("firefox", new FirefoxBrowser());
         browsers.put("safari", new SafariBrowser());
     }
 
-    // Method to register new browsers without modifying code
+    /**
+     * Key method that enables extensibility
+     * New browsers can be added at runtime
+     */
     public void registerBrowser(String name, Browser browser) {
         browsers.put(name.toLowerCase(), browser);
     }
@@ -63,20 +78,21 @@ class BrowserFactory {
 }
 
 /**
- * Step 4: Usage example showing extensibility
+ * Test class showing how to use the framework
+ * Demonstrates how easy it is to add new browsers
  */
 public class BrowserTest {
     private final BrowserFactory factory = new BrowserFactory();
 
     @Test
     public void testWithDifferentBrowsers() {
-        // Using existing browsers
+        // Use existing browsers without modification
         runTest("chrome");
         runTest("firefox");
 
-        // Adding new browser without modifying existing code
+        // Add new browser support without changing existing code
         factory.registerBrowser("edge", new EdgeBrowser());
-        runTest("edge");
+        runTest("edge");  // Works seamlessly with new browser
     }
 
     private void runTest(String browserType) {
@@ -92,12 +108,20 @@ public class BrowserTest {
     }
 }
 
-/* Benefits of OCP:
- * 1. Easy to add new browsers
- * 2. No modification of existing code
- * 3. Better separation of concerns
- * 4. More maintainable
- * 5. Reduced risk of bugs
- * 6. Better testability
- * 7. More flexible architecture
+/* How OCP is Achieved Here:
+ * 1. Browser interface is the extension point
+ * 2. BrowserFactory doesn't need modification for new browsers
+ * 3. Each new browser is a new class, not a code change
+ * 4. Runtime registration allows dynamic browser addition
+ *
+ * Practical Benefits:
+ * 1. Add new browsers without risk to existing code
+ * 2. No need to modify test code for new browsers
+ * 3. Easy to maintain and extend
+ * 4. Supports test automation framework growth
+ *
+ * Example of Adding New Browser:
+ * 1. Create new class implementing Browser interface
+ * 2. Register it with BrowserFactory
+ * 3. Existing code continues working unchanged
  */
